@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -107,12 +108,22 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 		}
 	}
 
+	file, err := os.Open("dicc.txt")
+
+	if err != nil {
+		config.Lg("buster", "file").Error(err.Error())
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	scanner := bufio.NewScanner(file)
+
 	var files []string
-	for i := 0; i < 10; i++ {
+	for scanner.Scan() {
 		b.WriteString(urlReq[:idx])
 		b.WriteByte('/')
-		path := "lol" + strconv.Itoa(i)
-		b.WriteString(path)
+		qs := url.QueryEscape(scanner.Text())
+		b.WriteString(qs)
 
 		u, err := url.Parse(b.String())
 		if err != nil {
@@ -130,7 +141,7 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 		}
 
 		if resp.StatusCode != http.StatusBadRequest {
-			files = append(files, path)
+			files = append(files, scanner.Text())
 		}
 		b.Reset()
 	}
