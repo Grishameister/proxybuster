@@ -115,7 +115,12 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-
+	defer func() {
+		if err := file.Close(); err != nil {
+			config.Lg("Close", "File").Error(err.Error())
+		}
+		return
+	}()
 	scanner := bufio.NewScanner(file)
 
 	var files []string
