@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func AddBoardRoutes(r *gin.Engine, db database.IDbConn) {
+func AddRoutes(r *gin.Engine, db database.IDbConn) {
 	repo := repository.NewRepoApi(db)
 	handler := NewApiHandler(http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {

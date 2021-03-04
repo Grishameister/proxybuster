@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/Grishameister/proxybuster/configs/config"
 	"github.com/Grishameister/proxybuster/internal/database"
+	delivery2 "github.com/Grishameister/proxybuster/pkg/api/delivery"
 	"github.com/Grishameister/proxybuster/pkg/httpProxy/delivery"
 	"github.com/Grishameister/proxybuster/pkg/httpProxy/repository"
 	"github.com/gin-gonic/gin"
@@ -38,8 +39,27 @@ func New(config *config.Config, db database.IDbConn) *Server {
 	return &Server{
 		logFile: logFile,
 		server: &http.Server{
-			Addr:         fmt.Sprintf("%s:%s", config.Web.Server.Address, config.Web.Server.Port),
+			Addr:         fmt.Sprintf("%s:%s", config.Proxy.Server.Address, config.Proxy.Server.Port),
 			Handler:      http.HandlerFunc(handler.Handle),
+			WriteTimeout: 15 * time.Second,
+			ReadTimeout:  15 * time.Second,
+		},
+	}
+}
+
+func NewApi(config *config.Config, db database.IDbConn) *Server {
+	gin.SetMode(gin.ReleaseMode)
+	logFile := setupGinLogger()
+
+	r := gin.Default()
+
+	delivery2.AddRoutes(r, db)
+
+	return &Server{
+		logFile: logFile,
+		server: &http.Server{
+			Addr:         fmt.Sprintf("%s:%s", config.Web.Server.Address, config.Web.Server.Port),
+			Handler:      r,
 			WriteTimeout: 15 * time.Second,
 			ReadTimeout:  15 * time.Second,
 		},

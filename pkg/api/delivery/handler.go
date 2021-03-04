@@ -129,10 +129,11 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 		b.WriteByte('/')
 		qs := url.QueryEscape(scanner.Text())
 		b.WriteString(qs)
-
+		
+		config.Lg("log", "req").Error(b.String())
 		u, err := url.Parse(b.String())
 		if err != nil {
-			config.Lg("repeat", "url").Error(err.Error())
+			config.Lg("repeat", "url").Info(err.Error())
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -140,9 +141,8 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 		req.URL = u
 		resp, err := h.client.Do(req)
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
 			config.Lg("repeat", "Do").Error(err.Error())
-			return
+			continue
 		}
 
 		if resp.StatusCode != http.StatusBadRequest {

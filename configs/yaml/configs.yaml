@@ -19,6 +19,15 @@ web: {
   }
 }
 
+proxy: {
+  server: {
+    address: "127.0.0.1",
+    port: "5005",
+    host: "example.com",
+    protocol: "http",
+  }
+}
+
 logger: {
   gin_file:  "/var/log/proxybuster/gin.log",
   gin_level: "release",  # (release|test|debug)

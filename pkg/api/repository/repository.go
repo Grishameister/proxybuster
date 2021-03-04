@@ -18,7 +18,7 @@ func NewRepoApi(db database.IDbConn) *Repository {
 }
 
 func (r *Repository) GetRequests() ([]domain.Request, error) {
-	rows, err := r.db.Query(context.Background(), "select id, url, body from requests")
+	rows, err := r.db.Query(context.Background(), "select id, url, req from requests")
 	if err != nil {
 		config.Lg("apiRepo", "GetRequests").Error(err.Error())
 		return nil, err
@@ -45,7 +45,7 @@ func (r *Repository) GetRequest(id int) (domain.Request, error) {
 		Id: id,
 	}
 
-	if err := r.db.QueryRow(context.Background(), "select url, body from requests where id = $1", d.Id).Scan(&d.Url, &d.Req); err != nil {
+	if err := r.db.QueryRow(context.Background(), "select url, req from requests where id = $1", d.Id).Scan(&d.Url, &d.Req); err != nil {
 		config.Lg("apiRepo", "GetRawReq").Error(err.Error())
 		return d, err
 	}

@@ -15,6 +15,7 @@ var (
 type Config struct {
 	Db     ConfDB     `mapstructure:"database"`
 	Web    ConfWeb    `mapstructure:"web"`
+	Proxy ConfWeb `mapstructure:"proxy"`
 	Logger ConfLogger `mapstructure:"logger"`
 }
 

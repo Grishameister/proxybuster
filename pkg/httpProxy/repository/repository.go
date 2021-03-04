@@ -17,7 +17,7 @@ func NewRepo(db database.IDbConn) *Repository {
 }
 
 func (r *Repository) StoreRequest(url string, req string) error {
-	if _, err := r.db.Exec(context.Background(), "insert into requests(url, body) values($1, $2)", url, req); err != nil {
+	if _, err := r.db.Exec(context.Background(), "insert into requests(url, req) values($1, $2)", url, req); err != nil {
 		config.Lg("repository", "StoreRequest").Error(err.Error())
 		return err
 	}

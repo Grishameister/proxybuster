@@ -22,7 +22,9 @@ func main() {
 	config.Lg("main", "main").Info("Connected to DB")
 
 	srv := server.New(config.Conf, dbConn)
+	api := server.NewApi(config.Conf, dbConn)
 
+	go api.Run()
 	srv.Run()
 
 	config.Lg("main", "main").Info("Server stopped")
