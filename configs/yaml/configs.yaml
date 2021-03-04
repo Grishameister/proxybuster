@@ -1,0 +1,28 @@
+database: {
+  postgres: {
+    driver_name: "postgres",
+    username: "postgres",
+    password: "qwe12345",
+    db_name: "request_proxy",
+    ssl_mode: "disable",
+    host: "localhost",
+    max_conn: 10,
+  }
+}
+
+web: {
+  server: {
+    address: "127.0.0.1",
+    port: "5000",
+    host: "example.com",
+    protocol: "http",
+  }
+}
+
+logger: {
+  gin_file:  "/var/log/proxybuster/gin.log",
+  gin_level: "release",  # (release|test|debug)
+  common_file: "/var/log/proxybuster/common.log",
+  common_level: "debug",  # (panic|fatal|error|warn|info|debug|trace)
+  stdout_log: "true",
+}
