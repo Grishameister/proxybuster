@@ -148,3 +148,31 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 
 	c.JSON(200, files)
 }
+
+
+func (h *ApiHandler) GetRequest(c *gin.Context) {
+	idStr := c.Param("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	buffReq, err := h.repo.GetRequest(id)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	c.JSON(http.StatusOK, buffReq)
+}
+
+func (h *ApiHandler) GetRequests(c *gin.Context) {
+	buffReq, err := h.repo.GetRequests()
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	c.JSON(http.StatusOK, buffReq)
+}
