@@ -10,13 +10,13 @@ import (
 
 type HttpProxyHandler struct {
 	client http.Client
-	repo httpProxy.IRepository
+	repo   httpProxy.IRepository
 }
 
 func NewProxyHttp(client http.Client, repo httpProxy.IRepository) *HttpProxyHandler {
 	return &HttpProxyHandler{
 		client: client,
-		repo: repo,
+		repo:   repo,
 	}
 }
 

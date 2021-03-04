@@ -38,8 +38,8 @@ func New(config *config.Config, db database.IDbConn) *Server {
 	return &Server{
 		logFile: logFile,
 		server: &http.Server{
-			Addr:    fmt.Sprintf("%s:%s", config.Web.Server.Address, config.Web.Server.Port),
-			Handler: http.HandlerFunc(handler.Handle),
+			Addr:         fmt.Sprintf("%s:%s", config.Web.Server.Address, config.Web.Server.Port),
+			Handler:      http.HandlerFunc(handler.Handle),
 			WriteTimeout: 15 * time.Second,
 			ReadTimeout:  15 * time.Second,
 		},

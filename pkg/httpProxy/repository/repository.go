@@ -12,7 +12,7 @@ type Repository struct {
 
 func NewRepo(db database.IDbConn) *Repository {
 	return &Repository{
-		db:db,
+		db: db,
 	}
 }
 

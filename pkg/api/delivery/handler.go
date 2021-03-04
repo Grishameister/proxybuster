@@ -14,13 +14,13 @@ import (
 
 type ApiHandler struct {
 	client http.Client
-	repo api.IRepository
+	repo   api.IRepository
 }
 
 func NewApiHandler(client http.Client, repo api.IRepository) *ApiHandler {
 	return &ApiHandler{
 		client: client,
-		repo: repo,
+		repo:   repo,
 	}
 }
 

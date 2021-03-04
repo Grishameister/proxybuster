@@ -1,9 +1,9 @@
 package database
 
 import (
-"context"
-"github.com/jackc/pgconn"
-"github.com/jackc/pgx/v4"
+	"context"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v4"
 )
 
 type IDbConn interface {
