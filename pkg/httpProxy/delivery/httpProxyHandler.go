@@ -4,8 +4,11 @@ import (
 	"github.com/Grishameister/proxybuster/configs/config"
 	"github.com/Grishameister/proxybuster/pkg/httpProxy"
 	"io"
+	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
+	"time"
 )
 
 type HttpProxyHandler struct {
@@ -20,7 +23,47 @@ func NewProxyHttp(client http.Client, repo httpProxy.IRepository) *HttpProxyHand
 	}
 }
 
+func (h *HttpProxyHandler) httpsProxy(w http.ResponseWriter, r *http.Request) {
+	destC, err := net.DialTimeout("tcp", r.Host, 10*time.Second)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	hijacker, ok := w.(http.Hijacker)
+	if !ok {
+		http.Error(w, "Hijacking not supported", http.StatusInternalServerError)
+		return
+	}
+
+	clientC, _, err := hijacker.Hijack()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	go transfer(destC, clientC)
+	go transfer(clientC, destC)
+}
+
+func transfer(dest io.WriteCloser, src io.ReadCloser) {
+	defer dest.Close()
+	defer src.Close()
+	_, err := io.Copy(dest, src)
+	if err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+}
+
 func (h *HttpProxyHandler) Handle(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodConnect {
+		h.httpsProxy(w, r)
+		return
+	}
+
 	reqNew, err := http.NewRequest(r.Method, r.RequestURI, r.Body)
 	defer r.Body.Close()
 	if err != nil {

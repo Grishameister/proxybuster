@@ -1,7 +1,7 @@
 database: {
   postgres: {
     driver_name: "postgres",
-    username: "postgres",
+    username: "docker",
     password: "qwe12345",
     db_name: "request_proxy",
     ssl_mode: "disable",
@@ -12,7 +12,7 @@ database: {
 
 web: {
   server: {
-    address: "127.0.0.1",
+    address: "0.0.0.0",
     port: "5000",
     host: "example.com",
     protocol: "http",
@@ -21,7 +21,7 @@ web: {
 
 proxy: {
   server: {
-    address: "127.0.0.1",
+    address: "0.0.0.0",
     port: "5005",
     host: "example.com",
     protocol: "http",
