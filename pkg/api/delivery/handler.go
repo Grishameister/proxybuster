@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"github.com/Grishameister/proxybuster/configs/config"
 	"github.com/Grishameister/proxybuster/pkg/api"
+	"github.com/Grishameister/proxybuster/pkg/domain"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -53,6 +54,18 @@ func (h *ApiHandler) newReq(c *gin.Context) (*http.Request, string, error) {
 	return req, buffReq.Url, nil
 }
 
+func (h *ApiHandler) copyReq(c *gin.Context) (domain.Request,  error) {
+	idStr := c.Param("id")
+
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return domain.Request{}, err
+	}
+
+	return h.repo.GetRequest(id)
+}
+
 func (h *ApiHandler) HandleRepeat(c *gin.Context) {
 	req, urlReq, err := h.newReq(c)
 	if err != nil {
@@ -90,15 +103,15 @@ func (h *ApiHandler) HandleRepeat(c *gin.Context) {
 }
 
 func (h *ApiHandler) ScanHandler(c *gin.Context) {
-	req, urlReq, err := h.newReq(c)
+	domreq, err := h.copyReq(c)
 	if err != nil {
 		return
 	}
 
 	i := 0
 	var b strings.Builder
-	idx := len(urlReq)
-	for j, c := range urlReq {
+	idx := len(domreq.Url)
+	for j, c := range domreq.Url {
 		if c == '/' {
 			i++
 		}
@@ -125,15 +138,26 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 
 	var files []string
 	for scanner.Scan() {
-		b.WriteString(urlReq[:idx])
+		tempBufReq := domreq
+		bufReader := bufio.NewReader(strings.NewReader(tempBufReq.Req))
+
+		req, err := http.ReadRequest(bufReader)
+		if err != nil {
+			config.Lg("repeat", "createReq").Error(err.Error())
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		req.RequestURI = ""
+
+		b.WriteString(domreq.Url[:idx])
 		b.WriteByte('/')
 		qs := url.QueryEscape(scanner.Text())
 		b.WriteString(qs)
-		
-		config.Lg("log", "req").Error(b.String())
+
 		u, err := url.Parse(b.String())
 		if err != nil {
-			config.Lg("repeat", "url").Info(err.Error())
+			config.Lg("repeat", "url").Error(err.Error())
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -141,11 +165,13 @@ func (h *ApiHandler) ScanHandler(c *gin.Context) {
 		req.URL = u
 		resp, err := h.client.Do(req)
 		if err != nil {
-			config.Lg("repeat", "Do").Error(err.Error())
+			//config.Lg("repeat", "Do").Error(err.Error())
+			b.Reset()
 			continue
 		}
 
-		if resp.StatusCode != http.StatusBadRequest {
+		config.Lg("log", "req").Info(b.String())
+		if resp.StatusCode != http.StatusNotFound {
 			files = append(files, scanner.Text())
 		}
 		b.Reset()
